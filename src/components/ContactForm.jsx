@@ -12,6 +12,19 @@ function ContactForm(props) {
 
   const [data, setData] = useState(initialValues);
 
+
+  useEffect(() => {
+    if(props.currentId == ''){
+      setData({
+        ...initialValues
+      })
+    }else{
+      setData({
+        ...props.contacts[props.currentId]
+      })
+    }
+  }, [props.currentId,props.contacts])
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setData({
@@ -22,7 +35,7 @@ function ContactForm(props) {
 
   const submitFormdata = (e) => {
     e.preventDefault();
-    props.AddorEdit(data);
+    props.addOrEdit(data);
   };
 
   return (
@@ -90,8 +103,8 @@ function ContactForm(props) {
                 onChange={(e) => handleInputChange(e)}
               />
             </InputGroup>
-            <Button type="submit" className="mb-2 col-12">
-              Save
+            <Button type="submit" className={"mb-2 col-12 " + (props.currentId?'bg-primary':'bg-success')}>
+              {props.currentId?"Update":"Save"}
             </Button>
           </Col>
         </Form.Row>

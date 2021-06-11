@@ -7,6 +7,7 @@ import { FaEdit,FaTrashAlt  } from "react-icons/fa";
 
 function Contacts() {
   const [contacts, setContacts] = useState({});
+  const [currentId, setCurrentId] = useState('');
 
     useEffect(() => {
         firebaseDB.child("contacts").on("value",snapshot=>{
@@ -18,18 +19,33 @@ function Contacts() {
         })
     }, [])
 
-  const AddorEdit = (data) => {
-    firebaseDB.child("contacts").push(data, (err) => {
-      if (err) {
-        console.log(err);
-      }
-    });
+  const addOrEdit = (data) => {
+    if(currentId == ''){
+      firebaseDB.child("contacts").push(data, (err) => {
+        if (err) {
+          console.log(err);
+        }else{
+          setCurrentId('')
+        }
+      });
+    }else{
+      firebaseDB.child(`contacts/${currentId}`).set(data, (err) => {
+        if (err) {
+          console.log(err);
+        }else{
+          setCurrentId('')
+        }
+      });
+    }
   };
 
+
+  const removeContact = (id) =>{
+      
+  }
   return (
     <>
       <div className="container-fluid mt-3">
-          {console.log(contacts)}
         <Jumbotron>
           <h1 className="display-4 text-center">
             Contacts CRUD React Apllication with Firebase!
@@ -37,7 +53,7 @@ function Contacts() {
         </Jumbotron>
         <div className="row">
           <div className="col-5">
-            <ContactForm AddorEdit={AddorEdit} />
+            <ContactForm {...({addOrEdit,currentId,contacts})} />
           </div>
           <div className="col-7">
             <Table striped bordered hover className="text-center">
@@ -52,15 +68,15 @@ function Contacts() {
               </thead>
               <tbody>
                 {
-                    Object.keys(contacts).map(id =>{
-                        return <tr key={id}>
-                            <td>{contacts[id].fullname}</td>
-                            <td>{contacts[id].phone}</td>
-                            <td>{contacts[id].email}</td>
-                            <td>{contacts[id].city}</td>
+                    Object.keys(contacts).map(contactId =>{
+                        return <tr key={contactId}>
+                            <td>{contacts[contactId].fullname}</td>
+                            <td>{contacts[contactId].email}</td>
+                            <td>{contacts[contactId].phone}</td>
+                            <td>{contacts[contactId].city}</td>
                             <td>
-                                <FaEdit style={{cursor:'pointer'}} className="text-primary"/>{' '}
-                                <FaTrashAlt  style={{cursor:'pointer'}} className="text-danger"/>
+                                <FaEdit onClick={()=>{setCurrentId(contactId)}} style={{cursor:'pointer'}} className="text-primary"/>{' '}
+                                <FaTrashAlt onClick={()=>removeContact(contactId)}  style={{cursor:'pointer'}} className="text-danger"/>
                             </td>
                         </tr>
                     })
